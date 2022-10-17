@@ -1,0 +1,168 @@
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오목</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      user-select: none;
+      background-color: rgb(185, 122, 87);
+    }
+    /* background-color: rgb(185, 122, 87); */
+    td {
+      width: 38px;
+      height: 40px;
+    }
+    .normal-ball {
+      background: url('./board.png') center center no-repeat;
+      background-position: -180px -180px;
+    }
+    .white-ball {
+      border-radius: 20px;
+      width: 35px;
+      height: 35px;
+      background-color: white;
+      margin: 0 auto;
+    }
+    .black-ball {
+      border-radius: 20px;
+      width: 35px;
+      height: 35px;
+      background-color: black;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <form id="form">
+    <input placeholder="가로 줄" id="row" size="5" />
+    <input placeholder="세로 줄" id="cell" size="5" />
+    <button>생성</button>
+  </form>
+  <table id="table"></table>
+  <div id="result"></div>
+  <script>
+    const $table = document.querySelector('#table');
+    const $result = document.querySelector('#result');
+    const $form = document.querySelector('#form');
+    let data = [];
+    let row;
+    let cell;
+    let turn = 1;
+    function onSubmit(event){
+      event.preventDefault();
+      row = parseInt(event.target.row.value);
+      cell = parseInt(event.target.cell.value);
+      startGame();
+    }
+    $form.addEventListener('submit', onSubmit);
+    function startGame() {
+      createdata();
+      drawbord();
+    }
+    function checkwinner(target) {
+      const rowIndex = target.parentNode.rowIndex;
+      const cellIndex = target.cellIndex;
+      let haswinner = false;
+      for (let i = 0; i < 5; i++) {
+        if (
+          data[rowIndex][cellIndex + i] === turn &&
+          data[rowIndex][cellIndex - 1 + i] === turn &&
+          data[rowIndex][cellIndex - 2 + i] === turn &&
+          data[rowIndex][cellIndex - 3 + i] === turn &&
+          data[rowIndex][cellIndex - 4 + i] === turn
+        ){
+          haswinner = true;
+          break;
+        }
+        if (
+          data[rowIndex + i]?.[cellIndex] === turn &&
+          data[rowIndex - 1 + i]?.[cellIndex] === turn &&
+          data[rowIndex - 2 + i]?.[cellIndex] === turn &&
+          data[rowIndex - 3 + i]?.[cellIndex] === turn &&
+          data[rowIndex - 4 + i]?.[cellIndex] === turn
+        ){
+          haswinner = true;
+          break;
+        }
+        if (
+          data[rowIndex + i]?.[cellIndex + i] === turn &&
+          data[rowIndex - 1 + i]?.[cellIndex - 1 + i] === turn &&
+          data[rowIndex - 2 + i]?.[cellIndex - 2 + i] === turn &&
+          data[rowIndex - 3 + i]?.[cellIndex - 3 + i] === turn &&
+          data[rowIndex - 4 + i]?.[cellIndex - 4 + i] === turn
+        ){
+          haswinner = true;
+          break;
+        }
+        if (
+          data[rowIndex - i]?.[cellIndex + i] === turn &&
+          data[rowIndex + 1 - i]?.[cellIndex - 1 + i] === turn &&
+          data[rowIndex + 2 - i]?.[cellIndex - 2 + i] === turn &&
+          data[rowIndex + 3 - i]?.[cellIndex - 3 + i] === turn &&
+          data[rowIndex + 4 - i]?.[cellIndex - 4 + i] === turn
+        ){
+          haswinner = true;
+          break;
+        }
+      }
+      if (haswinner){
+        $table.removeEventListener('click', onClick);
+        setTimeout(() => {
+          if (turn === 1) {
+            alert(`백돌의 승리!`);
+          } else if (turn === -1) {
+            alert(`흑돌의 승리!`);
+          }
+          reset();
+        }, 300);
+      }
+    }
+    function onClick() {
+      const target = event.target;
+      if (target.className !== 'normal-ball'){
+        return
+      }
+      const rowIndex = target.parentNode.rowIndex;
+      const cellIndex = target.cellIndex;
+      if(turn === 1){
+        data[rowIndex][cellIndex] = 1;
+        target.className = 'black-ball';
+      } else if(turn === -1){
+        data[rowIndex][cellIndex] = -1;
+        target.className = 'white-ball';
+      }
+      checkwinner(target);
+      turn = (turn === 1) ? -1 : 1;
+    }
+    function drawbord() {
+      data.forEach((row, i) => {
+        const $tr = document.createElement('tr');
+        row.forEach((cell, j) => {
+          const $td = document.createElement('td');
+          $td.className = 'normal-ball';
+          $tr.append($td);
+        })
+        $table.append($tr);
+      })
+    }
+    function createdata() {
+      for(let i = 0; i < row; i++){
+        const row = [];
+        data.push(row);
+        for(let j = 0; j < cell; j++){
+          row.push(0);
+        }
+      }
+      $table.addEventListener('click', onClick);
+    }
+    function reset() {
+      $table.innerHTML = '';
+      data = [];
+      turn = 1;
+    }
+  </script>
+</body>
+</html>

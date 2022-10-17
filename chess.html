@@ -1,0 +1,521 @@
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>체스</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      user-select: none;
+      background-color: rgb(185, 122, 87);
+    }
+    td {
+      width: 78px;
+      height: 80px;
+    }
+    .white-pawn {
+      background-image: url('./chess.png');
+      background-position: 75px 0px;
+      background-size: 426px 142px; 
+      width: 78px;
+      height: 80px;
+    }
+    .black-pawn {
+      background-image: url('./chess.png');
+      background-position: 75px -70px;
+      background-size: 426px 142px; 
+      width: 78px;
+      height: 80px;
+    }
+    .white-bishop {
+      background-image: url('./chess.png');
+      background-position: 288px 4px;
+      background-size: 426px 142px; 
+      width: 78px;
+      height: 80px;
+    }
+    .black-bishop {
+      background-image: url('./chess.png');
+      background-position: 288px -67px;
+      background-size: 426px 142px; 
+      width: 78px;
+      height: 80px;
+    }
+    .white-king {
+      background-image: url('./chess.png');
+      background-position: 5px 4px;
+      background-size: 426px 142px; 
+      width: 78px;
+      height: 80px;
+    }
+    .black-king {
+      background-image: url('./chess.png');
+      background-position: 5px -67px;
+      background-size: 426px 142px; 
+      width: 78px;
+      height: 80px;
+    }
+    .white-knight {
+      background-image: url('./chess.png');
+      background-position: 218px 4px;
+      background-size: 426px 142px; 
+      width: 78px;
+      height: 80px;
+    }
+    .black-knight {
+      background-image: url('./chess.png');
+      background-position: 218px -67px;
+      background-size: 426px 142px; 
+      width: 78px;
+      height: 80px;
+    }
+    .white-rook {
+      background-image: url('./chess.png');
+      background-position: 147px 4px;
+      background-size: 426px 142px; 
+      width: 78px;
+      height: 80px;
+    }
+    .black-rook {
+      background-image: url('./chess.png');
+      background-position: 147px -67px;
+      background-size: 426px 142px; 
+      width: 78px;
+      height: 80px;
+    }
+    .white-queen {
+      background-image: url('./chess.png');
+      background-position: -67px 4px;
+      background-size: 426px 142px; 
+      width: 78px;
+      height: 80px;
+    }
+    .black-queen {
+      background-image: url('./chess.png');
+      background-position: -67px -67px;
+      background-size: 426px 142px; 
+      width: 78px;
+      height: 80px;
+    }
+  </style>
+</head>
+<body>
+  <table id="table"></table>
+  <script>
+    const $table = document.querySelector('#table');
+    let data = [];
+    let nowdata;
+    const CODE = {
+      NORMAL: 0,
+      BPAWN: 1,
+      WPAWN: -1,
+      BROOK: 2,
+      WROOK: -2,
+      BKNIGHT: 3,
+      WKNIGHT: -3,
+      BBISHOP: 4,
+      WBISHOP: -4,
+      BQUEEN: 5,
+      WQUEEN: -5,
+      BKING: 6,
+      WKING: -6,
+    }
+    const row = 8;
+    const cell = 8;
+    let turn = 'w';
+    let gameover = false;
+    function createdata() {
+      for(let i = 0; i < row; i++){
+        const row = [];
+        data.push(row);
+        for(let j = 0; j < cell; j++){
+          if(i===1){
+            row.push(1);
+          } else if(i===6){
+            row.push(-1);
+          } else if(i===0 && (j===0 || j===7)){
+            row.push(2);
+          } else if(i===7 && (j===0 || j===7)){
+            row.push(-2);
+          } else if(i===0 && (j===1 || j===6)){
+            row.push(3);
+          } else if(i===7 && (j===1 || j===6)){
+            row.push(-3);
+          } else if(i===0 && (j===2 || j===5)){
+            row.push(4);
+          } else if(i===7 && (j===2 || j===5)){
+            row.push(-4);
+          } else if(i===0 && j===3){
+            row.push(5);
+          } else if(i===7 && j===3){
+            row.push(-5);
+          } else if(i===0 && j===4){
+            row.push(6);
+          } else if(i===7 && j===4){
+            row.push(-6);
+          } else {
+            row.push(0);
+          }
+        }
+      }
+    }
+    function drawbord() {
+      data.forEach((row, i) => {
+        const $tr = document.createElement('tr');
+        row.forEach((cell, j) => {
+          const $td = document.createElement('td');
+          if(i%2===1 && j%2===1){
+            $td.style.backgroundColor = 'rgb(220, 188, 171)';
+          }
+          else if(i%2===0 && j%2===0){
+            $td.style.backgroundColor = 'rgb(220, 188, 171)';
+          }
+          else{
+            $td.style.backgroundColor = 'rgb(185, 122, 87)';
+          }
+          if(data[i][j] === 1){
+            $td.classList.add('black-pawn');
+          } else if(data[i][j] === -1){
+            $td.classList.add('white-pawn');
+          } else if(data[i][j] === 2){
+            $td.classList.add('black-rook');
+          } else if(data[i][j] === -2){
+            $td.classList.add('white-rook');
+          } else if(data[i][j] === 3){
+            $td.classList.add('black-knight');
+          } else if(data[i][j] === -3){
+            $td.classList.add('white-knight');
+          } else if(data[i][j] === 4){
+            $td.classList.add('black-bishop');
+          } else if(data[i][j] === -4){
+            $td.classList.add('white-bishop');
+          } else if(data[i][j] === 5){
+            $td.classList.add('black-king');
+          } else if(data[i][j] === -5){
+            $td.classList.add('white-king');
+          } else if(data[i][j] === 6){
+            $td.classList.add('black-queen');
+          } else if(data[i][j] === -6){
+            $td.classList.add('white-queen');
+          }
+          $tr.append($td);
+        })
+        $table.append($tr);
+      })
+    }
+    function brightness() {
+      for(let i=0;i<8;i++){
+        for(let j=0;j<8;j++){
+          document.getElementById("table").getElementsByTagName("tr")[i].getElementsByTagName("td")[j].style.filter = "brightness(100%)";
+        }
+      }
+    }
+    function catchs(rI, cI) {
+      if (turn === 'w') {
+        if (data[rI][cI] > 0) {
+          document.getElementById("table").getElementsByTagName("tr")[rI].getElementsByTagName("td")[cI].style.filter = "brightness(30%)";
+        }
+      } else if (turn === 'b') {
+        if (data[rI][cI] < 0) {
+          document.getElementById("table").getElementsByTagName("tr")[rI].getElementsByTagName("td")[cI].style.filter = "brightness(30%)";
+        }
+      }
+    }
+    function blackpawnmove(e) {
+      const rowIndex = e.target.parentNode.rowIndex;
+      const cellIndex = e.target.cellIndex;
+      if(rowIndex === 1){
+        if(data[rowIndex+2][cellIndex] === CODE.NORMAL){
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex+2].getElementsByTagName("td")[cellIndex].style.filter = "brightness(50%)";
+        }
+      }
+      if (rowIndex < 7) {
+        if (data[rowIndex + 1][cellIndex] === CODE.NORMAL) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex + 1].getElementsByTagName("td")[cellIndex].style.filter = "brightness(50%)";
+        }
+        if (data[rowIndex + 1][cellIndex - 1] < 0) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex + 1].getElementsByTagName("td")[cellIndex - 1].style.filter = "brightness(30%)";
+        }
+        if (data[rowIndex + 1][cellIndex + 1] < 0) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex + 1].getElementsByTagName("td")[cellIndex + 1].style.filter = "brightness(30%)";
+        }
+      }
+    }
+    function whitepawnmove(e) {
+      const rowIndex = e.target.parentNode.rowIndex;
+      const cellIndex = e.target.cellIndex;
+      if(rowIndex === 6){
+        if(data[rowIndex-2][cellIndex] === CODE.NORMAL){
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex-2].getElementsByTagName("td")[cellIndex].style.filter = "brightness(50%)";
+        }
+      }
+      if (rowIndex > 0) {
+        if (data[rowIndex - 1][cellIndex] === CODE.NORMAL) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex - 1].getElementsByTagName("td")[cellIndex].style.filter = "brightness(50%)";
+        }
+        if (data[rowIndex - 1][cellIndex - 1] > 0) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex - 1].getElementsByTagName("td")[cellIndex - 1].style.filter = "brightness(30%)";
+        }
+        if (data[rowIndex - 1][cellIndex + 1] > 0) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex - 1].getElementsByTagName("td")[cellIndex + 1].style.filter = "brightness(30%)";
+        }
+      }
+    }
+    function rookmove(e) {
+      const rowIndex = e.target.parentNode.rowIndex;
+      const cellIndex = e.target.cellIndex;
+      if(rowIndex !== 7){
+        for(let i=rowIndex+1;i<8;i++){
+          if(data[i][cellIndex] === CODE.NORMAL){
+            document.getElementById("table").getElementsByTagName("tr")[i].getElementsByTagName("td")[cellIndex].style.filter = "brightness(50%)";
+          }
+          else{
+            catchs(i, cellIndex);
+            break;
+          }
+        }
+      }
+      if(rowIndex !== 0){
+        for(let i=rowIndex-1;i>=0;i--){
+          if(data[i][cellIndex] === CODE.NORMAL){
+            document.getElementById("table").getElementsByTagName("tr")[i].getElementsByTagName("td")[cellIndex].style.filter = "brightness(50%)";
+          }
+          else{
+            catchs(i, cellIndex);
+            break;
+          }
+        }
+      }
+      for (let i = cellIndex - 1; i >= 0; i--) {
+        if (data[rowIndex][i] === CODE.NORMAL) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex].getElementsByTagName("td")[i].style.filter = "brightness(50%)";
+        }
+        else{
+          catchs(rowIndex, i);
+          break;
+        }
+      }
+      for (let i = cellIndex + 1; i < 8; i++) {
+        if (data[rowIndex][i] === CODE.NORMAL) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex].getElementsByTagName("td")[i].style.filter = "brightness(50%)";
+        }
+        else{
+          catchs(rowIndex, i);
+          break;
+        }
+      }
+    }
+    function knightmove(e) {
+      const rowIndex = e.target.parentNode.rowIndex;
+      const cellIndex = e.target.cellIndex;
+      if(rowIndex >= 2){
+        if(data[rowIndex-2][cellIndex-1] ===CODE.NORMAL) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex-2].getElementsByTagName("td")[cellIndex-1].style.filter = "brightness(50%)";
+        } else{
+          catchs(rowIndex-2, cellIndex-1);
+        }
+        if(data[rowIndex-2][cellIndex+1] ===CODE.NORMAL) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex-2].getElementsByTagName("td")[cellIndex+1].style.filter = "brightness(50%)";
+        } else{
+          catchs(rowIndex-2, cellIndex+1);
+        }
+      }
+      if(rowIndex >= 1){
+        if(data[rowIndex-1][cellIndex-2] ===CODE.NORMAL) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex-1].getElementsByTagName("td")[cellIndex-2].style.filter = "brightness(50%)";
+        } else{
+          catchs(rowIndex-1, cellIndex-2);
+        }
+        if(data[rowIndex-1][cellIndex+2] ===CODE.NORMAL) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex-1].getElementsByTagName("td")[cellIndex+2].style.filter = "brightness(50%)";
+        } else{
+          catchs(rowIndex-1, cellIndex+2);
+        }
+      }
+      if(rowIndex <= 5){
+        if(data[rowIndex+2][cellIndex-1] ===CODE.NORMAL) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex+2].getElementsByTagName("td")[cellIndex-1].style.filter = "brightness(50%)";
+        } else{
+          catchs(rowIndex+2, cellIndex-1);
+        }
+        if(data[rowIndex+2][cellIndex+1] ===CODE.NORMAL) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex+2].getElementsByTagName("td")[cellIndex+1].style.filter = "brightness(50%)";
+        } else{
+          catchs(rowIndex+2, cellIndex+1);
+        }
+      }
+      if(rowIndex <= 6){
+        if(data[rowIndex+1][cellIndex-2] ===CODE.NORMAL) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex+1].getElementsByTagName("td")[cellIndex-2].style.filter = "brightness(50%)";
+        } else{
+          catchs(rowIndex+1, cellIndex-2);
+        }
+        if(data[rowIndex+1][cellIndex+2] ===CODE.NORMAL) {
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex+1].getElementsByTagName("td")[cellIndex+2].style.filter = "brightness(50%)";
+        } else{
+          catchs(rowIndex+1, cellIndex+2);
+        }
+      }
+    }
+    function bishopmove(e){
+      const rowIndex = e.target.parentNode.rowIndex;
+      const cellIndex = e.target.cellIndex;
+      if(rowIndex >= 1){
+        let k = 1;
+        for(let i=rowIndex-1;i>=0;i--){
+          if(data[i][cellIndex-k] === CODE.NORMAL){
+            document.getElementById("table").getElementsByTagName("tr")[i].getElementsByTagName("td")[cellIndex-k].style.filter = "brightness(50%)";
+            k += 1;
+          } else{
+            catchs(i, cellIndex-k);
+            break;
+          }
+        }
+        k=1;
+        for(let i=rowIndex-1;i>=0;i--){
+          if(data[i][cellIndex+k] === CODE.NORMAL){
+            document.getElementById("table").getElementsByTagName("tr")[i].getElementsByTagName("td")[cellIndex+k].style.filter = "brightness(50%)";
+            k += 1;
+          } else{
+            catchs(i, cellIndex+k);
+            break;
+          }
+        }
+      }
+      if(rowIndex <=6){
+        k=1;
+        for(let i=rowIndex+1;i<=7;i++){
+          if(data[i][cellIndex-k] === CODE.NORMAL){
+            document.getElementById("table").getElementsByTagName("tr")[i].getElementsByTagName("td")[cellIndex-k].style.filter = "brightness(50%)";
+            k += 1;
+          } else{
+            catchs(i, cellIndex-k);
+            break;
+          }
+        }
+        k=1;
+        for(let i=rowIndex+1;i<=7;i++){
+          if(data[i][cellIndex+k] === CODE.NORMAL){
+            document.getElementById("table").getElementsByTagName("tr")[i].getElementsByTagName("td")[cellIndex+k].style.filter = "brightness(50%)";
+            k += 1;
+          } else{
+            catchs(i, cellIndex+k);
+            break;
+          }
+        }
+      }
+    }
+    function queenmove(e) {
+      rookmove(e);
+      bishopmove(e);
+    }
+    function kingmove(e) {
+      const rowIndex = e.target.parentNode.rowIndex;
+      const cellIndex = e.target.cellIndex;
+      const array = [-1,0,1];
+      for(let j=0;j<3;j++){
+        if(rowIndex >= 1){
+          if(data[rowIndex-1][cellIndex+array[j]] === CODE.NORMAL){
+            document.getElementById("table").getElementsByTagName("tr")[rowIndex-1].getElementsByTagName("td")[cellIndex+array[j]].style.filter = "brightness(50%)";
+          } else {
+            catchs(rowIndex-1, cellIndex+array[j]);
+          }
+        }
+        if(data[rowIndex][cellIndex+array[j]] === CODE.NORMAL){
+          document.getElementById("table").getElementsByTagName("tr")[rowIndex].getElementsByTagName("td")[cellIndex+array[j]].style.filter = "brightness(50%)";
+        } else {
+          catchs(rowIndex, cellIndex+array[j]);
+        }
+        if(rowIndex <= 6){
+          if(data[rowIndex+1][cellIndex+array[j]] === CODE.NORMAL){
+            document.getElementById("table").getElementsByTagName("tr")[rowIndex+1].getElementsByTagName("td")[cellIndex+array[j]].style.filter = "brightness(50%)";
+          } else {
+            catchs(rowIndex+1, cellIndex+array[j]);
+          }
+        }
+      }
+    }
+    function reset(){
+      $table.innerHTML = '';
+      data = [];
+      startGame();
+      turn = 'w';
+      gameover = false;
+    }
+    function onClick(e) {
+      const rowIndex = e.target.parentNode.rowIndex;
+      const cellIndex = e.target.cellIndex;
+      if(e.target.style.filter === 'brightness(50%)'){
+        e.target.classList.add(nowdata.classList.value);
+        nowdata.classList.remove(nowdata.classList.value);
+        const rI = nowdata.parentNode.rowIndex;
+        const cI = nowdata.cellIndex;
+        data[rowIndex][cellIndex] = data[rI][cI];
+        data[rI][cI] = 0;
+        brightness();
+        turn = turn === 'b' ? 'w' : 'b';
+        return;
+      }
+      if(e.target.style.filter === 'brightness(30%)'){
+        if(e.target.classList.value === 'black-king' || e.target.classList.value === 'white-king'){
+          gameover = true;
+        }
+        e.target.classList.remove(e.target.classList.value);
+        e.target.classList.add(nowdata.classList.value);
+        nowdata.classList.remove(nowdata.classList.value);
+        const rI = nowdata.parentNode.rowIndex;
+        const cI = nowdata.cellIndex;
+        data[rowIndex][cellIndex] = data[rI][cI];
+        data[rI][cI] = 0;
+        brightness();
+        if(gameover){
+          console.log(turn);
+          const winner = turn === 'b' ? '흑' : '백';
+          setTimeout(() => {
+            alert(`${winner}이 승리하였습니다!`);
+            reset();
+          }, 0);
+        }
+        turn = turn === 'b' ? 'w' : 'b';
+        return;
+      }
+      if(nowdata !== e.target){
+        brightness();
+      }
+      nowdata=e.target;
+      if(e.target.classList.value === 'black-pawn' && turn === 'b'){
+        blackpawnmove(e);
+      } else if(e.target.classList.value === 'white-pawn' && turn === 'w'){
+        whitepawnmove(e);
+      } else if(e.target.classList.value === 'black-rook' && turn === 'b'){
+        rookmove(e);
+      } else if(e.target.classList.value === 'white-rook' && turn === 'w'){
+        rookmove(e);
+      } else if(e.target.classList.value === 'black-knight' && turn === 'b'){
+        knightmove(e);
+      } else if(e.target.classList.value === 'white-knight' && turn === 'w'){
+        knightmove(e);
+      } else if(e.target.classList.value === 'black-bishop' && turn === 'b'){
+        bishopmove(e);
+      } else if(e.target.classList.value === 'white-bishop' && turn === 'w'){
+        bishopmove(e);
+      } else if(e.target.classList.value === 'black-queen' && turn === 'b'){
+        queenmove(e);
+      } else if(e.target.classList.value === 'white-queen' && turn === 'w'){
+        queenmove(e);
+      } else if(e.target.classList.value === 'black-king' && turn === 'b'){
+        kingmove(e);
+      } else if(e.target.classList.value === 'white-king' && turn === 'w'){
+        kingmove(e);
+      }
+    } 
+    function startGame(){
+      createdata();
+      drawbord();
+    }
+    startGame();
+    $table.addEventListener('click', onClick);
+  </script>
+</body>
+</html>
